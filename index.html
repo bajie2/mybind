@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>mybind</title>
+        <link href="index.css" type="text/css" rel="stylesheet" />
+        <script type="text/javascript" src="mybind.js"></script>
+        <script type="text/javascript">
+            // 原始数据
+            var data = {
+                realName: "小人物",
+                mobile: "10086+0",
+                color: "blue",
+                list: [{
+                    title: "新华字典",
+                    price: 12
+                }, {
+                    title: "现代汉语词典",
+                    price: 36
+                }, {
+                    title: "辞海",
+                    price: 520
+                }, ]
+            };
+
+            // 没什么用的方法，只是用来模拟数据的改变
+            function changeData() {
+                var i = data.mobile.match(/\d+$/);
+                data.mobile = data.mobile.replace(/\d+$/, ++i);
+                var list = data.list;
+                if (list.length > 7) {
+                    list.splice(3, 5);
+                }
+                var index = Math.floor(Math.random() * list.length);
+                var item = list[index];
+                item.price += Math.floor(Math.random() * 10);
+                var id = Math.floor(Math.random() * 100)
+                list.push({
+                    title: "小册子" + id,
+                    price: id
+                });
+            }
+
+            // 加工界面专用数据
+            function dataForUI() {
+                var list = data.list;
+                list.forEach(item => {
+                    item.className = item == list.selected ? "selected" : "";
+                });
+            }
+
+            // 刷新界面
+            function refresh() {
+                dataForUI();
+                // 最关键的方法,把数据绑定到界面
+                myBind(data);
+            }
+
+            // 点击按钮事件
+            function btnOK_click() {
+                changeData();
+                refresh();
+            }
+
+            // 点击一本书的事件
+            function li_onclick(li) {
+                data.list.selected = li.theData; // theData是绑定时对应的循环项数据
+                refresh();
+            }
+        </script>
+    </head>
+    <body>
+        <div>姓名:${realName} 手机:${mobile}</div>
+        <p>请点击一本书: <b>${list.selected.title}</b></p>
+        <!-- theData 表示只使用原始数据的某个属性作为绑定数据源  -->
+        <ul theData="list">
+            <!-- loop-bind 表示这是一个列表循环项  -->
+            <li class="loop-bind ${className}" onclick="li_onclick(this);">${title} <b class="price">${price}</b></li>
+        </ul>
+        <button type="button" onclick="btnOK_click();">OK</button>
+    </body>
+</html>

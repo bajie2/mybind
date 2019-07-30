@@ -1,0 +1,32 @@
+button {
+    width: 120px;
+    height: 40px;
+    margin-right: 40px;
+}
+
+.selected {
+    background-color: steelblue;
+    color: white;
+}
+
+li {
+    cursor: pointer;
+    list-style-position: inside;
+    padding: 6px 10px;
+    margin: 2px 0px;
+    background-color: gainsboro;
+}
+
+p {
+    color: blue;
+}
+
+b {
+    color: #B22222;
+}
+
+.price {
+    color: burlywood;
+    font-weight: normal;
+    padding-left: 8px;
+}

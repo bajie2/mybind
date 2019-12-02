@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Life Game</title>
+		<style type="text/css">
+			html,
+			body {}
+
+			canvas {
+				background-color: dimgrey;
+			}
+
+			.div1 {
+				margin-bottom: 10px;
+			}
+		</style>
+		<script type="text/javascript">
+			var interval = 250;
+			var sizeCell = 15;
+			var sizeX = 100;
+			var sizeY = 100;
+			var width = sizeX * sizeCell;
+			var height = sizeY * sizeCell;
+			var data = [];
+			var cxt;
+			var isRun = false;
+			var nextStep = false;
+			let data2 = null;
+
+			function reset() {
+				data = new Array(sizeY);
+				for (var y = 0; y < sizeY; y++) {
+					data[y] = new Array(sizeX);
+					for (var x = 0; x < sizeX; x++) {
+						data[y][x] = Math.round(Math.random() * 100) % 5 == 1 ? 1 : 0;
+					}
+				}
+				return;
+				data[4][4] = 1;
+				data[4][5] = 1;
+				data[4][6] = 1;
+			}
+
+			function render() {
+				cxt.clearRect(0, 0, width, height);
+				for (var y = 0; y < sizeY; y++) {
+					for (var x = 0; x < sizeX; x++) {
+						var value = data[y][x];
+						cxt.fillStyle = value == 1 ? "#000000" : "#ffffff";
+						var left = 1 + x * (sizeCell + 1);
+						var top = 1 + y * (sizeCell + 1);
+						cxt.fillRect(left, top, sizeCell, sizeCell);
+					}
+				}
+			}
+
+			function work() {
+				if (isRun || nextStep) {
+					data2 = new Array(sizeY);
+					for (let y = 0; y < sizeY; y++) {
+						data2[y] = new Array(sizeX);
+						for (let x = 0; x < sizeX; x++) {
+							let count = getCount(x, y);
+							if (count == 3) {
+								data2[y][x] = 1
+							} else if (count != 2) {
+								data2[y][x] = 0
+							} else {
+								data2[y][x] = data[y][x];
+							}
+						}
+					}
+					data = data2;
+					if (nextStep) {
+						nextStep = false;
+					}
+				}
+				//
+				render();
+				//
+				setTimeout(work, interval);
+			}
+
+			function getCount(x, y) {
+				let count = 0;
+				count += getCellValue(y, x + 1);
+				count += getCellValue(y, x - 1);
+				count += getCellValue(y + 1, x);
+				count += getCellValue(y - 1, x);
+				count += getCellValue(y + 1, x + 1);
+				count += getCellValue(y + 1, x - 1);
+				count += getCellValue(y - 1, x + 1);
+				count += getCellValue(y - 1, x - 1);
+				return count;
+			}
+
+			function getCellValue(y, x) {
+				if (x < 0 || y < 0 || x >= sizeX || y >= sizeY) {
+					return 0;
+				}
+				return data[y][x];
+			}
+
+			function btnStart_click() {
+				if (isRun) {
+					return;
+				}
+				isRun = true;
+			}
+
+			function btnStop_click() {
+				isRun = false;
+			}
+
+			function btnReset_click() {
+				isRun = false;
+				reset();
+			}
+			window.onload = function() {
+				var canvas = document.getElementsByTagName('canvas')[0];
+				cxt = canvas.getContext("2d");
+				width = canvas.clientWidth;
+				height = canvas.clientHeight;
+				sizeX = Math.floor(width / (sizeCell + 1));
+				sizeY = Math.floor(height / (sizeCell + 1));
+				reset();
+				setTimeout(work, interval);
+			};
+
+			function canvas_mouseDown(event) {
+				if (isRun) {
+					return;
+				}
+				var x = event.offsetX;
+				var y = event.offsetY;
+				var xCell = Math.floor(x / (sizeCell + 1));
+				var yCell = Math.floor(y / (sizeCell + 1));
+				data[yCell][xCell] = data[yCell][xCell] == 1 ? 0 : 1;
+			}
+
+			function body_onkeydown(event) {
+				if (event.keyCode == 9) { // Tab
+					nextStep = true;
+					event.preventDefault();
+				}
+			}
+		</script>
+	</head>
+	<body onkeydown="body_onkeydown(event);">
+		<div class='div1'>
+			<button onclick="btnStart_click();">开始</button>
+			<button onclick="btnStop_click();">停止</button>
+			<button onclick="btnReset_click();">重新开始</button>
+			<span>停止时，可用鼠标设置方块，按Tab键运行一步。</span>
+		</div>
+		<canvas width="1400" height="700" onmousedown="canvas_mouseDown(event);"></canvas>
+	</body>
+</html>

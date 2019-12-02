@@ -16,12 +16,12 @@
 			}
 		</style>
 		<script type="text/javascript">
-			var interval = 250;
-			var sizeCell = 15;
-			var sizeX = 100;
-			var sizeY = 100;
-			var width = sizeX * sizeCell;
-			var height = sizeY * sizeCell;
+			var interval = 250; // 动画间隔毫秒
+			var sizeCell = 15; // 格子大小
+			var width = 1400; // 画布宽
+			var height = 700; // 画布高
+			var sizeX = Math.floor(width / (sizeCell + 1)); // 横向格数
+			var sizeY = Math.floor(height / (sizeCell + 1)); // 纵向格数
 			var data = [];
 			var cxt;
 			var isRun = false;
@@ -36,10 +36,6 @@
 						data[y][x] = Math.round(Math.random() * 100) % 5 == 1 ? 1 : 0;
 					}
 				}
-				return;
-				data[4][4] = 1;
-				data[4][5] = 1;
-				data[4][6] = 1;
 			}
 
 			function render() {
@@ -119,6 +115,8 @@
 			}
 			window.onload = function() {
 				var canvas = document.getElementsByTagName('canvas')[0];
+				canvas.width = width;
+				canvas.height = height;
 				cxt = canvas.getContext("2d");
 				width = canvas.clientWidth;
 				height = canvas.clientHeight;
@@ -154,6 +152,6 @@
 			<button onclick="btnReset_click();">重新开始</button>
 			<span>停止时，可用鼠标设置方块，按Tab键运行一步。</span>
 		</div>
-		<canvas width="1400" height="700" onmousedown="canvas_mouseDown(event);"></canvas>
+		<canvas onmousedown="canvas_mouseDown(event);"></canvas>
 	</body>
 </html>

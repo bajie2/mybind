@@ -14,6 +14,20 @@
 			.div1 {
 				margin-bottom: 10px;
 			}
+			.stop{
+				display: none;
+			}
+			.run .stop{
+				display: inline;
+			}
+			.run .start{
+				display: none;
+			}
+			button,
+			select {
+				width: 90px;
+				height: 30px;
+			}
 		</style>
 		<script type="text/javascript">
 			var interval = 250; // 动画间隔毫秒
@@ -22,19 +36,32 @@
 			var height = 700; // 画布高
 			var sizeX = Math.floor(width / (sizeCell + 1)); // 横向格数
 			var sizeY = Math.floor(height / (sizeCell + 1)); // 纵向格数
-			var data = [];
+			var data = new Array(sizeY);
+			var data2 = new Array(sizeY);
+			for (var y = 0; y < sizeY; y++) {
+				data[y] = new Array(sizeX);
+				data2[y] = new Array(sizeX);
+			}
 			var cxt;
 			var isRun = false;
 			var nextStep = false;
-			let data2 = null;
 
-			function reset() {
-				data = new Array(sizeY);
-				for (var y = 0; y < sizeY; y++) {
-					data[y] = new Array(sizeX);
-					for (var x = 0; x < sizeX; x++) {
-						data[y][x] = Math.round(Math.random() * 100) % 5 == 1 ? 1 : 0;
-					}
+			function preset(type) {
+				switch (type) {
+					case "随机":
+						for (var y = 0; y < sizeY; y++) {
+							for (var x = 0; x < sizeX; x++) {
+								data[y][x] = Math.round(Math.random() * 100) % 5 == 1 ? 1 : 0;
+							}
+						}
+						break;
+					case "空白":
+						for (var y = 0; y < sizeY; y++) {
+							for (var x = 0; x < sizeX; x++) {
+								data[y][x] = 0;
+							}
+						}
+						break;
 				}
 			}
 
@@ -99,19 +126,21 @@
 			}
 
 			function btnStart_click() {
+				var div=document.querySelector(".div1");
 				if (isRun) {
-					return;
+					isRun = false;
+					div.classList.remove("run");
+				} else {
+					isRun = true;
+					div.classList.add("run");
 				}
-				isRun = true;
 			}
 
-			function btnStop_click() {
+			function select_click(list) {
 				isRun = false;
-			}
-
-			function btnReset_click() {
-				isRun = false;
-				reset();
+				var type = list.options[list.selectedIndex].text;
+				console.log(type);
+				preset(type);
 			}
 			window.onload = function() {
 				var canvas = document.getElementsByTagName('canvas')[0];
@@ -122,13 +151,13 @@
 				height = canvas.clientHeight;
 				sizeX = Math.floor(width / (sizeCell + 1));
 				sizeY = Math.floor(height / (sizeCell + 1));
-				reset();
+				preset("随机");
 				setTimeout(work, interval);
 			};
 
 			function canvas_mouseDown(event) {
 				if (isRun) {
-					return;
+					btnStart_click();
 				}
 				var x = event.offsetX;
 				var y = event.offsetY;
@@ -139,18 +168,28 @@
 
 			function body_onkeydown(event) {
 				if (event.keyCode == 9) { // Tab
+					if (isRun) {
+						btnStart_click();
+					}
 					nextStep = true;
 					event.preventDefault();
+				}else if (event.keyCode == 13) { // Enter
+					btnStart_click();
+					event.preventDefault();
 				}
+				// console.log(event.keyCode);
 			}
 		</script>
 	</head>
 	<body onkeydown="body_onkeydown(event);">
 		<div class='div1'>
-			<button onclick="btnStart_click();">开始</button>
-			<button onclick="btnStop_click();">停止</button>
-			<button onclick="btnReset_click();">重新开始</button>
-			<span>停止时，可用鼠标设置方块，按Tab键运行一步。</span>
+			<button class="start" onclick="btnStart_click();" title="(Enter)">开始</button>
+			<button class="stop" onclick="btnStart_click();" title="(Enter)">停止</button>
+			<select onchange="select_click(this);">
+				<option>随机</option>
+				<option>空白</option>
+			</select>
+			<span>鼠标左键设置方块，按Tab键运行一步。</span>
 		</div>
 		<canvas onmousedown="canvas_mouseDown(event);"></canvas>
 	</body>

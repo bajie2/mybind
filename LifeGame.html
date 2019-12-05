@@ -402,7 +402,17 @@ x = 1, y = 1, rule = B3/S23
                 s = arr[1];
                 let x = left;
                 let y = top;
-                console.log('s=', s, sizeX, sizeY, left, top);
+                if (y >= sizeY) {
+                    y = Math.floor(sizeY / 2);
+                } else if (y < 0) {
+                    y = 0;
+                }
+                if (x >= sizeX) {
+                    x = Math.floor(sizeX / 2);
+                } else if (x < 0) {
+                    x = 0;
+                }
+                // console.log('s=', s, sizeX, sizeY, left, top);
                 arr = s.split("$");
                 var reg = /(\d*)([bo])/g;
                 var count;
@@ -427,7 +437,7 @@ x = 1, y = 1, rule = B3/S23
                     x = left;
                     y += count;
                     if (y >= sizeY) {
-                        console.log('out y=', y, sizeY)
+                        // console.log('out y=', y, sizeY)
                         break;
                     }
                 }

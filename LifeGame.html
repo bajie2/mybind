@@ -89,6 +89,7 @@ x = 1, y = 1, rule = B3/S23
             var isRun = false;
             var nextStep = false;
             var divInput;
+            var offset = {};
 
             function parseScript1() {
                 var s = document.getElementById('script1').innerHTML;
@@ -235,10 +236,13 @@ x = 1, y = 1, rule = B3/S23
                 if (isRun) {
                     btnStart_click();
                 }
-                var x = touch.offsetX;
-                var y = touch.offsetY;
+                var x = touch.pageX - offset.left;
+                var y = touch.pageY - offset.top;
                 var xCell = Math.floor(x / (sizeCell + 1));
                 var yCell = Math.floor(y / (sizeCell + 1));
+                if (xCell >= sizeX || yCell >= sizeY) {
+                    return;
+                }
                 if (isDown) {
                     data[yCell][xCell] = data[yCell][xCell] == 1 ? 0 : 1;
                 } else {
@@ -454,11 +458,16 @@ x = 1, y = 1, rule = B3/S23
                 pushData(txt.value);
                 txt.value = "";
             }
+            window.onerror = function(msg, url, l) {
+                // alert([msg, url, l].join("\n"));
+            }
             window.onload = function() {
                 var canvas = document.getElementsByTagName('canvas')[0];
                 canvas.width = width;
                 canvas.height = height;
                 cxt = canvas.getContext("2d");
+                offset.left = canvas.offsetLeft;
+                offset.top = canvas.offsetTop;
                 parseScript1();
                 preset("随机");
                 setTimeout(work, interval);
@@ -480,7 +489,7 @@ x = 1, y = 1, rule = B3/S23
         </div>
         <div class="divInput">
             <label>请把游戏数据粘贴到文本框:</label>
-            <textarea id="txt1" rows="3" cols="80" onchange="txt_onchange(this);"></textarea>
+            <textarea id="txt1" rows="3" cols="80"></textarea>
             <button onclick="divInput.style.display='none';">取消</button>
             <button onclick="btnOK_onclick();">确定</button>
         </div>

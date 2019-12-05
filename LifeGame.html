@@ -1,196 +1,330 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8" />
-		<title>Life Game</title>
-		<style type="text/css">
-			html,
-			body {}
+    <head>
+        <meta charset="utf-8" />
+        <title>Life Game</title>
+        <style type="text/css">
+            html,
+            body {}
 
-			canvas {
-				background-color: dimgrey;
-			}
+            canvas {
+                background-color: dimgrey;
+            }
 
-			.div1 {
-				margin-bottom: 10px;
-			}
-			.stop{
-				display: none;
-			}
-			.run .stop{
-				display: inline;
-			}
-			.run .start{
-				display: none;
-			}
-			button,
-			select {
-				width: 90px;
-				height: 30px;
-			}
-		</style>
-		<script type="text/javascript">
-			var interval = 250; // 动画间隔毫秒
-			var sizeCell = 15; // 格子大小
-			var width = 1400; // 画布宽
-			var height = 700; // 画布高
-			var sizeX = Math.floor(width / (sizeCell + 1)); // 横向格数
-			var sizeY = Math.floor(height / (sizeCell + 1)); // 纵向格数
-			var data = new Array(sizeY);
-			var data2 = new Array(sizeY);
-			for (var y = 0; y < sizeY; y++) {
-				data[y] = new Array(sizeX);
-				data2[y] = new Array(sizeX);
-			}
-			var cxt;
-			var isRun = false;
-			var nextStep = false;
+            .div1 {
+                margin-bottom: 10px;
+            }
 
-			function preset(type) {
-				switch (type) {
-					case "随机":
-						for (var y = 0; y < sizeY; y++) {
-							for (var x = 0; x < sizeX; x++) {
-								data[y][x] = Math.round(Math.random() * 100) % 5 == 1 ? 1 : 0;
-							}
-						}
-						break;
-					case "空白":
-						for (var y = 0; y < sizeY; y++) {
-							for (var x = 0; x < sizeX; x++) {
-								data[y][x] = 0;
-							}
-						}
-						break;
-				}
-			}
+            .stop {
+                display: none;
+            }
 
-			function render() {
-				cxt.clearRect(0, 0, width, height);
-				for (var y = 0; y < sizeY; y++) {
-					for (var x = 0; x < sizeX; x++) {
-						var value = data[y][x];
-						cxt.fillStyle = value == 1 ? "#000000" : "#ffffff";
-						var left = 1 + x * (sizeCell + 1);
-						var top = 1 + y * (sizeCell + 1);
-						cxt.fillRect(left, top, sizeCell, sizeCell);
-					}
-				}
-			}
+            .run .stop {
+                display: inline;
+            }
 
-			function work() {
-				if (isRun || nextStep) {
-					data2 = new Array(sizeY);
-					for (let y = 0; y < sizeY; y++) {
-						data2[y] = new Array(sizeX);
-						for (let x = 0; x < sizeX; x++) {
-							let count = getCount(x, y);
-							if (count == 3) {
-								data2[y][x] = 1
-							} else if (count != 2) {
-								data2[y][x] = 0
-							} else {
-								data2[y][x] = data[y][x];
-							}
-						}
-					}
-					data = data2;
-					if (nextStep) {
-						nextStep = false;
-					}
-				}
-				//
-				render();
-				//
-				setTimeout(work, interval);
-			}
+            .run .start {
+                display: none;
+            }
 
-			function getCount(x, y) {
-				let count = 0;
-				count += getCellValue(y, x + 1);
-				count += getCellValue(y, x - 1);
-				count += getCellValue(y + 1, x);
-				count += getCellValue(y - 1, x);
-				count += getCellValue(y + 1, x + 1);
-				count += getCellValue(y + 1, x - 1);
-				count += getCellValue(y - 1, x + 1);
-				count += getCellValue(y - 1, x - 1);
-				return count;
-			}
+            button,
+            select {
+                width: 70px;
+                height: 30px;
+            }
+        </style>
+        <script type="text/javascript">
+            var interval = 250; // 动画间隔毫秒
+            var sizeCell = 15; // 格子大小
+            var width = 1400; // 画布宽
+            var height = 700; // 画布高
+            var sizeX = Math.floor(width / (sizeCell + 1)); // 横向格数
+            var sizeY = Math.floor(height / (sizeCell + 1)); // 纵向格数
+            var data = new Array(sizeY);
+            var data2 = new Array(sizeY);
+            for (var y = 0; y < sizeY; y++) {
+                data[y] = new Array(sizeX);
+                data2[y] = new Array(sizeX);
+            }
+            var cxt;
+            var isRun = false;
+            var nextStep = false;
 
-			function getCellValue(y, x) {
-				if (x < 0 || y < 0 || x >= sizeX || y >= sizeY) {
-					return 0;
-				}
-				return data[y][x];
-			}
+            function preset(type) {
+                switch (type) {
+                    case "随机":
+                        for (var y = 0; y < sizeY; y++) {
+                            for (var x = 0; x < sizeX; x++) {
+                                data[y][x] = Math.round(Math.random() * 100) % 5 == 1 ? 1 : 0;
+                            }
+                        }
+                        break;
+                    case "空白":
+                        for (var y = 0; y < sizeY; y++) {
+                            for (var x = 0; x < sizeX; x++) {
+                                data[y][x] = 0;
+                            }
+                        }
+                        break;
+                }
+            }
 
-			function btnStart_click() {
-				var div=document.querySelector(".div1");
-				if (isRun) {
-					isRun = false;
-					div.classList.remove("run");
-				} else {
-					isRun = true;
-					div.classList.add("run");
-				}
-			}
+            function render() {
+                cxt.clearRect(0, 0, width, height);
+                for (var y = 0; y < sizeY; y++) {
+                    for (var x = 0; x < sizeX; x++) {
+                        var value = data[y][x];
+                        cxt.fillStyle = value == 1 ? "#000000" : "#ffffff";
+                        var left = 1 + x * (sizeCell + 1);
+                        var top = 1 + y * (sizeCell + 1);
+                        cxt.fillRect(left, top, sizeCell, sizeCell);
+                    }
+                }
+            }
 
-			function select_click(list) {
-				isRun = false;
-				var type = list.options[list.selectedIndex].text;
-				console.log(type);
-				preset(type);
-			}
-			window.onload = function() {
-				var canvas = document.getElementsByTagName('canvas')[0];
-				canvas.width = width;
-				canvas.height = height;
-				cxt = canvas.getContext("2d");
-				width = canvas.clientWidth;
-				height = canvas.clientHeight;
-				sizeX = Math.floor(width / (sizeCell + 1));
-				sizeY = Math.floor(height / (sizeCell + 1));
-				preset("随机");
-				setTimeout(work, interval);
-			};
+            function work() {
+                if (isRun || nextStep) {
+                    for (let y = 0; y < sizeY; y++) {
+                        for (let x = 0; x < sizeX; x++) {
+                            let count = 0
+                            for (let y2 = y - 1; y2 <= y + 1; y2++) {
+                                for (let x2 = x - 1; x2 <= x + 1; x2++) {
+                                    if (y2 < 0 || x2 < 0 || y2 >= sizeY || x2 >= sizeX) {
+                                        continue;
+                                    }
+                                    count += data[y2][x2];
+                                }
+                            }
+                            count -= data[y][x];
+                            if (count == 3) {
+                                data2[y][x] = 1
+                            } else if (count != 2) {
+                                data2[y][x] = 0
+                            } else {
+                                data2[y][x] = data[y][x];
+                            }
+                        }
+                    }
+                    let swap = data;
+                    data = data2;
+                    data2 = swap;
+                    if (nextStep) {
+                        nextStep = false;
+                    }
+                }
+                //
+                render();
+                //
+                setTimeout(work, interval);
+            }
 
-			function canvas_mouseDown(event) {
-				if (isRun) {
-					btnStart_click();
-				}
-				var x = event.offsetX;
-				var y = event.offsetY;
-				var xCell = Math.floor(x / (sizeCell + 1));
-				var yCell = Math.floor(y / (sizeCell + 1));
-				data[yCell][xCell] = data[yCell][xCell] == 1 ? 0 : 1;
-			}
+            function btnStart_click() {
+                var div = document.querySelector(".div1");
+                if (isRun) {
+                    isRun = false;
+                    div.classList.remove("run");
+                } else {
+                    isRun = true;
+                    div.classList.add("run");
+                }
+            }
 
-			function body_onkeydown(event) {
-				if (event.keyCode == 9) { // Tab
-					if (isRun) {
-						btnStart_click();
-					}
-					nextStep = true;
-					event.preventDefault();
-				}else if (event.keyCode == 13) { // Enter
-					btnStart_click();
-					event.preventDefault();
-				}
-				// console.log(event.keyCode);
-			}
-		</script>
-	</head>
-	<body onkeydown="body_onkeydown(event);">
-		<div class='div1'>
-			<button class="start" onclick="btnStart_click();" title="(Enter)">开始</button>
-			<button class="stop" onclick="btnStart_click();" title="(Enter)">停止</button>
-			<select onchange="select_click(this);">
-				<option>随机</option>
-				<option>空白</option>
-			</select>
-			<span>鼠标左键设置方块，按Tab键运行一步。</span>
-		</div>
-		<canvas onmousedown="canvas_mouseDown(event);"></canvas>
-	</body>
+            function select_click(list) {
+                isRun = false;
+                var type = list.options[list.selectedIndex].text;
+                preset(type);
+            }
+            window.onload = function() {
+                var canvas = document.getElementsByTagName('canvas')[0];
+                canvas.width = width;
+                canvas.height = height;
+                cxt = canvas.getContext("2d");
+                width = canvas.clientWidth;
+                height = canvas.clientHeight;
+                sizeX = Math.floor(width / (sizeCell + 1));
+                sizeY = Math.floor(height / (sizeCell + 1));
+                preset("随机");
+                setTimeout(work, interval);
+            };
+
+            function canvas_mouseDown(event) {
+                if (isRun) {
+                    btnStart_click();
+                }
+                var x = event.offsetX;
+                var y = event.offsetY;
+                var xCell = Math.floor(x / (sizeCell + 1));
+                var yCell = Math.floor(y / (sizeCell + 1));
+                data[yCell][xCell] = data[yCell][xCell] == 1 ? 0 : 1;
+            }
+
+            function btnStep_click() {
+                if (isRun) {
+                    btnStart_click();
+                }
+                nextStep = true;
+            }
+
+            function btnClear_click() {
+                if (isRun) {
+                    btnStart_click();
+                }
+                for (let y = 0; y < sizeY; y++) {
+                    for (let x = 0; x < sizeX; x++) {
+                        data[y][x] = 0;
+                    }
+                }
+            }
+
+            function btnCopy_click() {
+                let s = getData();
+                copy(s);
+            }
+
+            function btnPaste_click() {
+                let s = paste();
+            }
+
+            function body_onkeydown(event) {
+                if (event.keyCode == 9) { // Tab
+                    btnStep_click();
+                    event.preventDefault();
+                } else if (event.keyCode == 13) { // Enter
+                    btnStart_click();
+                    event.preventDefault();
+                } else if (event.keyCode == 67 && event.ctrlKey) { // Ctrl+C
+                    btnCopy_click();
+                    event.preventDefault();
+                } else if (event.keyCode == 86 && event.ctrlKey) { // Ctrl+V
+                    btnPaste_click();
+                    event.preventDefault();
+                } else if (event.keyCode == 46) { // Delete
+                    btnClear_click();
+                    event.preventDefault();
+                }
+                console.log(event.keyCode, event.ctrlKey);
+            }
+
+            function getData() {
+                var left = 0;
+                var top = 0;
+                Label1:
+                    for (let y = 0; y < sizeY; y++) {
+                        for (let x = 0; x < sizeX; x++) {
+                            if (data[y][x] > 0) {
+                                top = y;
+                                break Label1;
+                            }
+                        }
+                    }
+                Label2:
+                    for (let x = 0; x < sizeX; x++) {
+                        for (let y = 0; y < sizeY; y++) {
+                            if (data[y][x] > 0) {
+                                left = x;
+                                break Label2;
+                            }
+                        }
+                    }
+                var result = [];
+                result.push(`x = ${left}, y = ${top}, rule = B3/S23\n`);
+                var line = [];
+                var v;
+                var count;
+                var v2 = null;
+                var count2 = 0;
+
+                function pushItem() {
+                    var s = "bo".charAt(v);
+                    if (count > 1) {
+                        s = count + s;
+                    }
+                    line.push(s);
+                }
+
+                function pushItem2() {
+                    if (result.length > 1) {
+                        var s = "$";
+                        if (count2 > 1) {
+                            s = count2 + s;
+                        }
+                        result.push(s);
+                    }
+                    result.push(line.join(""));
+                }
+                for (let y = top; y < sizeY; y++) {
+                    v = data[y][left];
+                    count = 0;
+                    line = [];
+                    for (let x = left; x < sizeX; x++) {
+                        if (data[y][x] == v) {
+                            count++;
+                        } else {
+                            pushItem();
+                            v = data[y][x];
+                            count = 1;
+                        }
+                    }
+                    if (v > 0) {
+                        pushItem();
+                    }
+                    var empty = line.length == 0;
+                    if (empty) {
+                        count2++;
+                    } else {
+                        pushItem2();
+                        count2 = 1;
+                    }
+                    v2 = empty;
+                }
+                result.push("!");
+                return result.join("");
+            }
+
+            function copy(s) {
+                document.oncopy = function(e) {
+                    e.clipboardData.setData('text', s);
+                    e.preventDefault();
+                    document.oncopy = null;
+                }
+                document.execCommand('Copy');
+            }
+
+            function paste() {
+                document.onpaste = function(e) {
+                    console.log("Nice");
+                    var item = e.clipboardData.items[0];
+                    alert(item);
+                    e.preventDefault();
+                    document.onpaste = null;
+                }
+                document.execCommand('Paste');
+                console.log("paste");
+            }
+
+            function body_onpaste(event) {
+                var item = event.clipboardData.items[0];
+                if (item.kind === "string") {
+                    item.getAsString(function(str) {
+                        console.log(str)
+                    });
+                }
+            }
+        </script>
+    </head>
+    <body onkeydown="body_onkeydown(event);" >
+        <div class='div1'>
+            <button class="start" onclick="btnStart_click();" title="(Enter)">开始</button>
+            <button class="stop" onclick="btnStart_click();" title="(Enter)">停止</button>
+            <button onclick="btnStep_click();" title="(Tab)">单步</button>
+            <button onclick="btnClear_click();" title="(Delete)">清空</button>
+            <button onclick="btnCopy_click();" title="(Ctrl+C)">复制</button>
+            <button onclick="btnPaste_click();" title="(Ctrl+V)">粘贴</button>
+            <select onchange="select_click(this);">
+                <option>随机</option>
+                <option>空白</option>
+            </select>
+        </div>
+        <canvas onmousedown="canvas_mouseDown(event);"></canvas>
+    </body>
 </html>

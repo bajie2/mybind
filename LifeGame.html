@@ -33,11 +33,31 @@
                 height: 30px;
             }
         </style>
+        <script type="text/plain" id="script1">
+            T
+x = 12, y = 10, rule = B3/S23
+3o$bo$bo!
+坦克
+x = 39, y = 28, rule = B3/S23
+2o$b2o$2o!
+滑翔机
+x = 10, y = 41, rule = B3/S23
+3o$2bo$bo!
+凤凰
+x = 1, y = 1, rule = B3/S23
+3bo$3bobo$bo$6b2o$2o$6bo$2bobo$4bo!
+脉冲星
+x = 29, y = 11, rule = B3/S23
+2b2o5b2o$3b2o3b2o$o2bobobobo2bo$3ob2ob2ob3o$bobobobobobo$2b3o3b3o2$2b3o3b3o$bobobobobobo$3ob2ob2ob3o$o2bobobobo2bo$3b2o3b2o$2b2o5b2o!
+滑翔机枪
+x = 1, y = 1, rule = B3/S23
+23bobo$21bo3bo$13bo7bo12b2o$12b4o4bo4bo8b2o$2o9b2obobo4bo$2o8b3obo2bo3bo3bo$11b2obobo6bobo$12b4o$13bo!            
+        </script>
         <script type="text/javascript">
-            var interval = 250; // 动画间隔毫秒
-            var sizeCell = 15; // 格子大小
-            var width = 1400; // 画布宽
-            var height = 700; // 画布高
+            var interval = 200; // 动画间隔毫秒
+            var sizeCell = 10; // 格子大小
+            var width = document.documentElement.clientWidth - 20; // 1400; // 画布宽
+            var height = document.documentElement.clientHeight - 60; // 700; // 画布高
             var sizeX = Math.floor(width / (sizeCell + 1)); // 横向格数
             var sizeY = Math.floor(height / (sizeCell + 1)); // 纵向格数
             var data = new Array(sizeY);
@@ -50,7 +70,44 @@
             var isRun = false;
             var nextStep = false;
 
+            function parseScript1() {
+                var s = document.getElementById('script1').innerHTML;
+                var arr = s.split("\n");
+                var result = {};
+                var index = 0;
+                var o;
+                for (var i = 0; i < arr.length; i++) {
+                    var line = arr[i].trim();
+                    if (!line) {
+                        continue;
+                    }
+                    index++;
+                    switch (index) {
+                        case 1:
+                            o = {};
+                            o.text = line;
+                            break;
+                        case 2:
+                            o.data = line;
+                            break;
+                        case 3:
+                            o.data += "\n" + line;
+                            result[o.text] = o;
+                            index = 0;
+                            break;
+                    }
+                }
+                var list = document.getElementsByTagName("select")[0];
+                list.data = result;
+                for (var i in result) {
+                    o = document.createElement("option");
+                    o.text = i;
+                    list.options.add(o);
+                }
+            }
+
             function preset(type) {
+                var list = document.getElementsByTagName("select")[0];
                 switch (type) {
                     case "随机":
                         for (var y = 0; y < sizeY; y++) {
@@ -59,12 +116,12 @@
                             }
                         }
                         break;
-                    case "空白":
-                        for (var y = 0; y < sizeY; y++) {
-                            for (var x = 0; x < sizeX; x++) {
-                                data[y][x] = 0;
-                            }
+                    default:
+                        let s = list.data[type].data;
+                        if (!s) {
+                            return;
                         }
+                        pushData(s);
                         break;
                 }
             }
@@ -130,7 +187,9 @@
             }
 
             function select_click(list) {
-                isRun = false;
+                if (isRun) {
+                    btnStart_click();
+                }
                 var type = list.options[list.selectedIndex].text;
                 preset(type);
             }
@@ -139,15 +198,24 @@
                 canvas.width = width;
                 canvas.height = height;
                 cxt = canvas.getContext("2d");
-                width = canvas.clientWidth;
-                height = canvas.clientHeight;
-                sizeX = Math.floor(width / (sizeCell + 1));
-                sizeY = Math.floor(height / (sizeCell + 1));
+                parseScript1();
                 preset("随机");
                 setTimeout(work, interval);
             };
+            let leftButtonDown = false;
 
-            function canvas_mouseDown(event) {
+            function canvas_mouseUp(event) {
+                leftButtonDown = false;
+            }
+
+            function canvas_mouseDown(event, isDown) {
+                event.preventDefault();
+                if (isDown && event.button == 0) {
+                    leftButtonDown = true;
+                }
+                if (!leftButtonDown) {
+                    return;
+                }
                 if (isRun) {
                     btnStart_click();
                 }
@@ -155,7 +223,11 @@
                 var y = event.offsetY;
                 var xCell = Math.floor(x / (sizeCell + 1));
                 var yCell = Math.floor(y / (sizeCell + 1));
-                data[yCell][xCell] = data[yCell][xCell] == 1 ? 0 : 1;
+                if (isDown) {
+                    data[yCell][xCell] = data[yCell][xCell] == 1 ? 0 : 1;
+                } else {
+                    data[yCell][xCell] = 1;
+                }
             }
 
             function btnStep_click() {
@@ -196,13 +268,13 @@
                     btnCopy_click();
                     event.preventDefault();
                 } else if (event.keyCode == 86 && event.ctrlKey) { // Ctrl+V
-                    btnPaste_click();
-                    event.preventDefault();
+                    //btnPaste_click();
+                    //event.preventDefault();
                 } else if (event.keyCode == 46) { // Delete
                     btnClear_click();
                     event.preventDefault();
                 }
-                console.log(event.keyCode, event.ctrlKey);
+                // console.log(event.keyCode, event.ctrlKey);
             }
 
             function getData() {
@@ -281,6 +353,58 @@
                 return result.join("");
             }
 
+            function pushData(s) {
+                if (!s) {
+                    return;
+                }
+                s = s.trim();
+                if (!s.match(/!$/)) {
+                    return;
+                }
+                btnClear_click();
+                var p = s.indexOf("\n");
+                var left = 0;
+                var top = 0;
+                var match;
+                if (p > 0) {
+                    var s2 = s.substr(0, p);
+                    match = s2.match(/x\s*=\s*(\d+),\s*y\s*=\s*(\d+)/);
+                    left = parseInt(match[1]);
+                    top = parseInt(match[2]);
+                }
+                s = s.substring(p + 1, s.length - 1);
+                let x = left;
+                let y = top;
+                var arr = s.split("$");
+                var reg = /(\d*)([bo])/g;
+                var count;
+                for (let i = 0; i < arr.length; i++) {
+                    let line = arr[i];
+                    while (true) {
+                        match = reg.exec(line);
+                        if (!match) {
+                            break;
+                        }
+                        count = match[1] || 1;
+                        var value = match[2] == "o" ? 1 : 0
+                        for (let j = 0; j < count; j++) {
+                            data[y][x++] = value;
+                            if (x >= sizeX) {
+                                break;
+                            }
+                        }
+                    }
+                    match = line.match(/\d+$/);
+                    count = match ? parseInt(match[0]) : 1;
+                    x = left;
+                    y += count;
+                    if (y >= sizeY) {
+                        console.log('out y=', y, sizeY)
+                        break;
+                    }
+                }
+            }
+
             function copy(s) {
                 document.oncopy = function(e) {
                     e.clipboardData.setData('text', s);
@@ -291,28 +415,21 @@
             }
 
             function paste() {
-                document.onpaste = function(e) {
-                    console.log("Nice");
-                    var item = e.clipboardData.items[0];
-                    alert(item);
-                    e.preventDefault();
-                    document.onpaste = null;
-                }
+                alert("不会写...\n请用Ctrl+V");
                 document.execCommand('Paste');
-                console.log("paste");
             }
 
             function body_onpaste(event) {
                 var item = event.clipboardData.items[0];
                 if (item.kind === "string") {
-                    item.getAsString(function(str) {
-                        console.log(str)
+                    item.getAsString(function(s) {
+                        pushData(s);
                     });
                 }
             }
         </script>
     </head>
-    <body onkeydown="body_onkeydown(event);" >
+    <body onkeydown="body_onkeydown(event);" onpaste="body_onpaste(event)">
         <div class='div1'>
             <button class="start" onclick="btnStart_click();" title="(Enter)">开始</button>
             <button class="stop" onclick="btnStart_click();" title="(Enter)">停止</button>
@@ -322,9 +439,8 @@
             <button onclick="btnPaste_click();" title="(Ctrl+V)">粘贴</button>
             <select onchange="select_click(this);">
                 <option>随机</option>
-                <option>空白</option>
             </select>
         </div>
-        <canvas onmousedown="canvas_mouseDown(event);"></canvas>
+        <canvas onmousemove="canvas_mouseDown(event);" onmousedown="canvas_mouseDown(event,true);" onmouseup="canvas_mouseUp(event);"></canvas>
     </body>
 </html>

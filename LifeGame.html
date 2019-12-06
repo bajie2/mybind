@@ -480,9 +480,48 @@ x = 1, y = 1, rule = B3/S23
                 offset.top = canvas.offsetTop;
                 parseScript1();
                 preset("随机");
+                btnClear_click();
                 setTimeout(work, interval);
                 divInput = document.querySelector(".divInput");
             };
+
+            function drawLine(x1, y1, x2, y2) {
+                if (x1 == x2 && y1 == y2) {
+                    data[y1][x1] = 1;
+                    return;
+                } else {
+                    let stepX = x2 == x1 ? 0 : (x2 > x1 ? 1 : -1);
+                    let stepY = y2 == y1 ? 0 : (y2 > y1 ? 1 : -1);
+                    if (x1 == x2 || y1 == y2) {
+                        for (let x = x1, y = y1; x != x2 + stepX || y != y2 + stepY; x += stepX, y += stepY) {
+                            data[y][x] = 1;
+                        }
+                    } else {
+                        if (Math.abs(x2 - x1) > Math.abs(y2 - y1)) {
+                            for (let x = x1; x != x2 + stepX; x += stepX) {
+                                let yf = (y2 - y1) * (x - x1) / (x2 - x1) + y1;
+                                let y = Math.round(yf);
+                                data[y][x] = 1;
+                            }
+                        } else {
+                            for (let y = y1; y != y2 + stepY; y += stepY) {
+                                let xf = (x2 - x1) * (y - y1) / (y2 - y1) + x1;
+                                let x = Math.round(xf);
+                                data[y][x] = 1;
+                            }
+                        }
+                    }
+                }
+            }
+
+            function btnTest_click() {
+                var x10 = 2;
+                var y10 = 2;
+                var x20 = 12;
+                var y20 = 5;
+
+                drawLine(x10, y10, x20, y20);
+            }
         </script>
     </head>
     <body onkeydown="body_onkeydown(event);" onpaste="body_onpaste(event)">
@@ -493,6 +532,7 @@ x = 1, y = 1, rule = B3/S23
             <button onclick="btnClear_click();" title="(Delete)">清空</button>
             <button onclick="btnCopy_click();" title="复制所有格子数据到剪贴板(Ctrl+C)">复制</button>
             <button onclick="btnPaste_click();" title="加载来自剪贴板的格子数据(Ctrl+V)">粘贴</button>
+            <button onclick="btnTest_click();" title="加载来自剪贴板的格子数据(Ctrl+V)">Test</button>
             <select onchange="select_click(this);" title="预设图形">
                 <option>随机</option>
             </select>

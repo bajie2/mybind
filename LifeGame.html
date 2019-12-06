@@ -218,7 +218,10 @@ x = 1, y = 1, rule = B3/S23
 
             function canvas_mouseUp(event) {
                 leftButtonDown = false;
+                prePoint.x = null;
+                prePoint.y = null;
             }
+            let prePoint = {};
 
             function canvas_mouseDown(event, isDown) {
                 event.preventDefault();
@@ -246,7 +249,13 @@ x = 1, y = 1, rule = B3/S23
                 if (isDown) {
                     data[yCell][xCell] = data[yCell][xCell] == 1 ? 0 : 1;
                 } else {
-                    data[yCell][xCell] = 1;
+                    if (prePoint.x) {
+                        drawLine(prePoint.x, prePoint.y, xCell, yCell);
+                    } else {
+                        data[yCell][xCell] = 1;
+                    }
+                    prePoint.x = xCell;
+                    prePoint.y = yCell;
                 }
             }
 
@@ -276,26 +285,6 @@ x = 1, y = 1, rule = B3/S23
             function btnPaste_click() {
                 divInput.style.display = "block";
                 document.querySelector(".divInput textarea").value = "";
-            }
-
-            function body_onkeydown(event) {
-                if (event.keyCode == 9) { // Tab
-                    btnStep_click();
-                    event.preventDefault();
-                } else if (event.keyCode == 13) { // Enter
-                    btnStart_click();
-                    event.preventDefault();
-                } else if (event.keyCode == 67 && event.ctrlKey) { // Ctrl+C
-                    btnCopy_click();
-                    event.preventDefault();
-                } else if (event.keyCode == 86 && event.ctrlKey) { // Ctrl+V
-                    //btnPaste_click();
-                    //event.preventDefault();
-                } else if (event.keyCode == 46) { // Delete
-                    btnClear_click();
-                    event.preventDefault();
-                }
-                // console.log(event.keyCode, event.ctrlKey);
             }
 
             function getData() {
@@ -468,22 +457,22 @@ x = 1, y = 1, rule = B3/S23
                 pushData(txt.value);
                 txt.value = "";
             }
-            window.onerror = function(msg, url, l) {
-                // alert([msg, url, l].join("\n"));
+
+            function speed(value) {
+                if (value > 0) {
+                    interval -= Math.round(interval * 0.1);
+                    if (interval < 10) {
+                        interval = 10;
+                    }
+                } else if (value < 0) {
+                    interval += Math.round(interval * 0.1);
+                    if (interval > 2000) {
+                        interval = 2000;
+                    }
+                } else {
+                    interval = 200;
+                }
             }
-            window.onload = function() {
-                var canvas = document.getElementsByTagName('canvas')[0];
-                canvas.width = width;
-                canvas.height = height;
-                cxt = canvas.getContext("2d");
-                offset.left = canvas.offsetLeft;
-                offset.top = canvas.offsetTop;
-                parseScript1();
-                preset("随机");
-                btnClear_click();
-                setTimeout(work, interval);
-                divInput = document.querySelector(".divInput");
-            };
 
             function drawLine(x1, y1, x2, y2) {
                 if (x1 == x2 && y1 == y2) {
@@ -514,17 +503,70 @@ x = 1, y = 1, rule = B3/S23
                 }
             }
 
-            function btnTest_click() {
-                var x10 = 2;
-                var y10 = 2;
-                var x20 = 12;
-                var y20 = 5;
-
-                drawLine(x10, y10, x20, y20);
+            function body_onkeydown(event) {
+                switch (event.keyCode) {
+                    case 9: // Tab
+                        btnStep_click();
+                        event.preventDefault();
+                        break;
+                    case 13: // Enter
+                        btnStart_click();
+                        event.preventDefault();
+                        break;
+                    case 67: // Ctrl+C
+                        if (event.ctrlKey) {
+                            btnCopy_click();
+                            event.preventDefault();
+                        }
+                        break;
+                    case 86: // Ctrl+V
+                        if (event.ctrlKey) {
+                            //btnPaste_click();
+                            //event.preventDefault();
+                        }
+                        break;
+                    case 46: // Delete
+                        btnClear_click();
+                        event.preventDefault();
+                        break;
+                    case 107: // +
+                    case 187: // +
+                        speed(1);
+                        event.preventDefault();
+                        break;
+                    case 109: // -
+                    case 189: // -
+                        speed(-1);
+                        event.preventDefault();
+                        break;
+                    case 48: // 0
+                    case 96: // 0
+                        speed(0);
+                        event.preventDefault();
+                        break;
+                }
+                // console.log(event.keyCode);
             }
+
+            window.onerror = function(msg, url, l) {
+                // alert([msg, url, l].join("\n"));
+            }
+            window.onload = function() {
+                var canvas = document.getElementsByTagName('canvas')[0];
+                canvas.width = width;
+                canvas.height = height;
+                cxt = canvas.getContext("2d");
+                offset.left = canvas.offsetLeft;
+                offset.top = canvas.offsetTop;
+                parseScript1();
+                preset("随机");
+                setTimeout(work, interval);
+                divInput = document.querySelector(".divInput");
+            };
         </script>
     </head>
-    <body onkeydown="body_onkeydown(event);" onpaste="body_onpaste(event)">
+    <body onkeydown="body_onkeydown(event);" onpaste="body_onpaste(event)" onmouseup="canvas_mouseUp(event);"
+        ontouchend="canvas_mouseUp(event);">
         <div class='div1'>
             <button class="start" onclick="btnStart_click();" title="(Enter)">开始</button>
             <button class="stop" onclick="btnStart_click();" title="(Enter)">停止</button>
@@ -532,7 +574,8 @@ x = 1, y = 1, rule = B3/S23
             <button onclick="btnClear_click();" title="(Delete)">清空</button>
             <button onclick="btnCopy_click();" title="复制所有格子数据到剪贴板(Ctrl+C)">复制</button>
             <button onclick="btnPaste_click();" title="加载来自剪贴板的格子数据(Ctrl+V)">粘贴</button>
-            <button onclick="btnTest_click();" title="加载来自剪贴板的格子数据(Ctrl+V)">Test</button>
+            <button onclick="speed(1);" title="(+)">加速</button>
+            <button onclick="speed(-1);" title="(-)">减速</button>
             <select onchange="select_click(this);" title="预设图形">
                 <option>随机</option>
             </select>
@@ -543,7 +586,8 @@ x = 1, y = 1, rule = B3/S23
             <button onclick="divInput.style.display='none';">取消</button>
             <button onclick="btnOK_onclick();">确定</button>
         </div>
-        <canvas onmousemove="canvas_mouseDown(event);" ontouchmove="canvas_mouseDown(event);" onmousedown="canvas_mouseDown(event,true);"
-            onmouseup="canvas_mouseUp(event);"></canvas>
+        <canvas onmousemove="canvas_mouseDown(event);" ontouchmove="canvas_mouseDown(event);" onmousedown="canvas_mouseDown(event,true);">
+
+        </canvas>
     </body>
 </html>

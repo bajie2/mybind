@@ -466,12 +466,12 @@ x = 1, y = 1, rule = B3/S23
 
             function speed(value) {
                 if (value > 0) {
-                    interval -= Math.round(interval * 0.1);
+                    interval -= Math.round(interval * 0.5);
                     if (interval < 10) {
                         interval = 10;
                     }
                 } else if (value < 0) {
-                    interval += Math.round(interval * 0.1);
+                    interval += Math.round(interval * 0.5);
                     if (interval > 2000) {
                         interval = 2000;
                     }

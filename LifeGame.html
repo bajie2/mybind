@@ -224,18 +224,21 @@ x = 1, y = 1, rule = B3/S23
             let prePoint = {};
 
             function canvas_mouseDown(event, isDown) {
-                event.preventDefault();
                 if (isDown && event.button == 0) {
                     leftButtonDown = true;
                 }
                 var touch = event;
                 if (event.targetTouches) {
+                    if (event.targetTouches.length > 1) {
+                        return;
+                    }
                     touch = event.targetTouches[0];
                     leftButtonDown = true;
                 }
                 if (!leftButtonDown) {
                     return;
                 }
+                event.preventDefault();
                 if (isRun) {
                     btnStart_click();
                 }
@@ -383,12 +386,15 @@ x = 1, y = 1, rule = B3/S23
                 var left = 0;
                 var top = 0;
                 if (arr.length > 1) {
-                    var s2 = arr[0];
+                    let s2 = arr[0];
                     match = s2.match(/x\s*=\s*(\d+),\s*y\s*=\s*(\d+)/);
-                    left = parseInt(match[1]);
-                    top = parseInt(match[2]);
+                    if (match) {
+                        left = parseInt(match[1]);
+                        top = parseInt(match[2]);
+                        arr.splice(0, 1);
+                    }
                 }
-                s = arr[1];
+                s = arr.join("");
                 let x = left;
                 let y = top;
                 if (y >= sizeY) {

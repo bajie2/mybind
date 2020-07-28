@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>ForMybatisLog</title>
+        <style type="text/css">
+            button {
+                width: 120px;
+                height: 32px;
+                display: block;
+            }
+
+            textarea {
+                width: 800px;
+                height: 200px;
+                display: block;
+                margin-top: 16px;
+            }
+        </style>
+    </head>
+    <script type="text/javascript">
+        let s =
+            `2020-07-18 10:01:54.794 DEBUG 11460 --- [      Thread-40] c.j.j.m.ShipPushMapper.shipPushDataAdd   : ==>  Preparing: INSERT INTO ShipPushData ( Shipname, Callsign, Imo, Mmsi, Eventtype, Eventtime, Eventtime_utc, Portname_en, Portid, Porttime_zone, Terminal_name, Country_en, Portname_cn, Portcode, CreatedAt, CompanyId, ShipId, ShipName2 ) SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), CompanyId, ShipId, ShipName FROM Ship WHERE MMSI=?; 
+2020-07-18 10:01:54.795 DEBUG 11460 --- [      Thread-40] c.j.j.m.ShipPushMapper.shipPushDataAdd   : ==> Parameters: HUI JIN QIAO 219(String), 0000(String), 7(String), 1580015(Long), 3(Integer), 2020-07-16 23:17(String), 2020-07-16 15:17(String), Fuzhou(String), 27400(String), 8.0(String), (String), China(String), 福州(String), CNFZG(String), 1580015(Long)`;
+        window.onload = function() {
+            document.getElementById('txt1').value = s;
+        }
+
+        function btnOK_click() {
+            let s = document.getElementById('txt1').value.trim();
+            let arr = s.split('\n');
+            let s1 = arr[0];
+            let match = s1.match(/==>\s+Preparing:\s*(.+)/);
+            s1 = match[1];
+            //
+            let s2 = arr[1];
+            match = s2.match(/==>\s+Parameters:\s*(.+)/);
+            s2 = match[1];
+            let reg = /(.*?)(\((\w+)\))?(, |$)/g;
+            let params = [];
+            let value;
+            let count = 0;
+            while (true) {
+                match = reg.exec(s2);
+                count++;
+                if (!match || count > 1000) {
+                    break;
+                }
+                value = match[1];
+                if (match[3] == "String") {
+                    value = "'" + value.replace("'", "''") + "'";
+                }
+                params.push(value);
+            }
+            console.log(s1, params);
+            reg = /\?/g
+            let index = 0;
+            s1 = s1.replace(reg, function() {
+                return params[index++];
+            });
+
+            document.getElementById('txt2').value = s1;
+        }
+    </script>
+    <body>
+        <button onclick="btnOK_click();">确定</button>
+        <textarea id="txt1" placeholder="输入"></textarea>
+        <textarea id="txt2" placeholder="输出"></textarea>
+    </body>
+</html>
